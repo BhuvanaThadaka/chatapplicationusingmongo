@@ -1,4 +1,3 @@
-
 'use strict';
 
 const usernamePage = document.querySelector('#username-page');
@@ -14,6 +13,21 @@ let stompClient = null;
 let nickname = null;
 let fullname = null;
 let selectedUserId = null;
+
+// Toggle visibility of the text input field
+function toggleFullNameInput() {
+    const fullnameElement = document.querySelector('#connected-user-fullname');
+    const fullnameInput = document.querySelector('#fullname-input');
+
+    if (fullnameInput.classList.contains('hidden')) {
+        fullnameInput.classList.remove('hidden');
+        fullnameInput.classList.add('visible');
+        fullnameInput.focus(); // Optional: focus the input when it becomes visible
+    } else {
+        fullnameInput.classList.remove('visible');
+        fullnameInput.classList.add('hidden');
+    }
+}
 
 function connect(event) {
     nickname = document.querySelector('#nickname').value.trim();
@@ -31,12 +45,11 @@ function connect(event) {
     event.preventDefault();
 }
 
-
 function onConnected() {
     stompClient.subscribe(`/user/${nickname}/queue/messages`, onMessageReceived);
     stompClient.subscribe(`/user/public`, onMessageReceived);
 
-    // register the connected user
+    // Register the connected user
     stompClient.send("/app/user.addUser",
         {},
         JSON.stringify({nickName: nickname, fullName: fullname, status: 'ONLINE'})
@@ -102,7 +115,6 @@ function userItemClick(event) {
     const nbrMsg = clickedUser.querySelector('.nbr-msg');
     nbrMsg.classList.add('hidden');
     nbrMsg.textContent = '0';
-
 }
 
 function displayMessage(senderId, content) {
@@ -129,12 +141,10 @@ async function fetchAndDisplayUserChat() {
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-
 function onError() {
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
     connectingElement.style.color = 'red';
 }
-
 
 function sendMessage(event) {
     const messageContent = messageInput.value.trim();
@@ -152,7 +162,6 @@ function sendMessage(event) {
     chatArea.scrollTop = chatArea.scrollHeight;
     event.preventDefault();
 }
-
 
 async function onMessageReceived(payload) {
     await findAndDisplayConnectedUsers();
@@ -184,6 +193,9 @@ function onLogout() {
     );
     window.location.reload();
 }
+
+// Add event listener to toggle full name input visibility
+document.querySelector('#connected-user-fullname').addEventListener('click', toggleFullNameInput);
 
 usernameForm.addEventListener('submit', connect, true); // step 1
 messageForm.addEventListener('submit', sendMessage, true);
